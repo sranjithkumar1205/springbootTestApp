@@ -1,6 +1,8 @@
 # Use a base image with Java installed
 FROM openjdk:17-jdk-slim
 
+RUN apt-get update && apt-get install -y docker.io
+
 # Set the working directory inside the container
 WORKDIR /app
 
