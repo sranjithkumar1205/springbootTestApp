@@ -49,11 +49,28 @@ public class SampleController {
   }
 
   private String execCommand(String command) {
+    System.out.println("Running command: " + command);
+
+    StringBuilder output = new StringBuilder();
     try {
       Process process = Runtime.getRuntime().exec(command);
+
       BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
-      return reader.readLine();
-    } catch (IOException e) {
+      BufferedReader errorReader = new BufferedReader(new InputStreamReader(process.getErrorStream()));
+
+      String line;
+      while ((line = reader.readLine()) != null) {
+        output.append(line);
+      }
+
+      while ((line = errorReader.readLine()) != null) {
+        System.err.println("ERROR: " + line); // Log errors for debugging
+      }
+
+      process.waitFor();
+      return output.toString().trim();
+    } catch (Exception e) {
+      e.printStackTrace();
       return "error";
     }
   }
