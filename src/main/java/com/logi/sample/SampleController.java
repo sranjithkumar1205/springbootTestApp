@@ -12,8 +12,8 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 public class SampleController {
-  @GetMapping("/hello")
-  public Map<String, String> hello() {
+  @GetMapping("/containerInfo")
+  public Map<String, String> containerInfo() {
     Map<String, String> info = new HashMap<>();
     String version = "0.0.3";
 
