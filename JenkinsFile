@@ -1,0 +1,70 @@
+pipeline {
+    agent any
+    environment {
+        IS_LS_COMMAND_REQUIRED = 'NO'
+        DOCKER_IMAGE='springbootapp-v1'
+        DOCKER_CONTAINER_NAME='springbootapp-v1-container'
+    }
+    parameters {
+        string(name:'IS_ECHO_COMMAND_REQUIRED', defaultValue: 'NO', description: 'Echo Command Required')
+        choice (name:'IS_DOCKER_COMMAND_REQUIRED', choices: ['YES','NO'], description: 'Docker Command Required')
+    }
+    stages {
+        stage ('git clone') {
+            steps {
+                git credentialsId: 'ranjith_github_account', url: 'https://github.com/sranjithkumar1205/springbootTestApp.git'
+            }
+        }
+        stage ('ls command') {
+            when {
+                expression {
+                    IS_LS_COMMAND_REQUIRED == 'YES'
+                }
+            }
+            steps {
+                sh 'ls'
+            }
+        }
+        stage ('echo command') {
+            when {
+                expression {
+                    params.IS_ECHO_COMMAND_REQUIRED == 'YES'
+                }
+            }
+            steps {
+                sh 'echo $PATH'
+                sh 'echo $BUILD_NUMBER'
+            }
+        }
+        stage ('docker command') {
+            when {
+                expression {
+                    params.IS_DOCKER_COMMAND_REQUIRED == 'YES'
+                }
+            }
+            steps {
+                sh 'docker --version'
+            }
+        }
+        stage ('maven install') {
+            steps {
+                sh 'mvn clean install -Dmaven.test.skip=true'
+            }
+        }
+        stage ('docker build') {
+            steps {
+                sh 'docker build -t $DOCKER_IMAGE:$BUILD_NUMBER .'
+            }
+        }
+        stage ('remove old docker container if already') {
+            steps {
+                sh 'docker rm -f $DOCKER_CONTAINER_NAME || true'
+            }
+        }
+        stage ('run new docker container') {
+            steps {
+                sh 'docker run -d --name=$DOCKER_CONTAINER_NAME -p 9000:9000 -v /var/run/docker.sock:/var/run/docker.sock $DOCKER_IMAGE:$BUILD_NUMBER'
+            }
+        }
+    }
+}
