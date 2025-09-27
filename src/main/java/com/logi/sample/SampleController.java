@@ -15,7 +15,7 @@ public class SampleController {
   @GetMapping("/containerInfo")
   public Map<String, String> containerInfo() {
     Map<String, String> info = new HashMap<>();
-    String version = "0.0.3";
+    String version = "1.0.5";
 
     // Get container ID from hostname
     String containerId = getHostName();
